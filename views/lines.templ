@@ -1,0 +1,74 @@
+package views
+
+import (
+	"github.com/moth13/finance_tracker/views/components"
+	decimal "github.com/shopspring/decimal"
+)
+
+type Infos struct {
+	Balance      decimal.Decimal
+	FinalBalance decimal.Decimal
+	Lines        []*components.Line
+}
+
+templ Line(infos Infos) {
+	<!DOCTYPE html>
+	<html lang="en">
+		@components.Header()
+		<body>
+			<main class="min-h-screen w-full">
+				<div class="mt-6 w-full flex justify-center items-center flex-col">
+					if infos.Balance.GreaterThanOrEqual(decimal.Zero) {
+						<h2 class="px-6 py-2 text-green-500">{ infos.Balance.String() }€</h2>
+					} else {
+						<h2 class="px-6 py-2 text-red-500">{ infos.Balance.String() }€</h2>
+					}
+					if infos.FinalBalance.GreaterThanOrEqual(decimal.Zero) {
+						<h3 class="px-2 py-0 text-green-400">({ infos.FinalBalance.String() }€)</h3>
+					} else {
+						<h3 class="px-2 py-0 text-red-400">({ infos.FinalBalance.String() }€)</h3>
+					}
+					<button class="bg-blue-500 text-white px-4 py-2 rounded" 
+							hx-get="/new_line" hx-target="body" hx-swap="beforeend">
+						New Line
+					</button>
+                    // <a hx-swap="transition:true" class="badge badge-info p-4 hover:scale-[1.1] block border rounded-md px-5 py-2.5 text-gray-600 transition hover:text-white hover:bg-blue-700 dark:hover:bg-blue-500" href="/new_line"  hx-ext="json-enc" >
+                    //     New Line
+                    // </a>
+				</div>
+				<div class="mt-6 w-full flex justify-center items-center flex-col">
+					<ul id="todo-list">
+						<table class="min-w-full table-auto bg-white rounded-lg shadow-md">
+							<thead>
+								<tr class="bg-gray-200">
+									<th class="px-6 py-2 text-left text-gray-600">Checkbox</th>
+									<th class="px-6 py-2 text-left text-gray-600">Date</th>
+									<th class="px-6 py-2 text-left text-gray-600">Titre</th>
+									<th class="px-6 py-2 text-left text-gray-600">Valeur</th>
+									<th class="px-6 py-2 text-left text-gray-600">Catégorie</th>
+									<th class="px-6 py-2 text-left text-gray-600">Compte</th>
+									<th class="px-6 py-2 text-left text-gray-600">Month</th>
+									<th class="px-6 py-2 text-left text-gray-600"></th>
+									<th class="px-6 py-2 text-left text-gray-600"></th>
+								</tr>
+							</thead>
+							<tbody>
+								for _, line := range infos.Lines {
+									@components.LineComponent(*line)
+								}
+							</tbody>
+						</table>
+					</ul>
+				</div>
+			</main>
+		</body>
+		@components.Footer()
+	</html>
+	<script>
+        function reloadPage() {
+                setTimeout(function() {
+            window.location.reload();
+        }, 2000);
+        }
+    </script>
+}

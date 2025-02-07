@@ -1,0 +1,54 @@
+package views
+
+
+templ CreateLine() {
+	<div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h2 class="text-xl font-bold mb-4">Ajouter une Transaction</h2>
+        <form hx-post="/new_line" method="post" href="/new-line">
+            <div class="mb-4">
+                <label class="block text-gray-700">Titre</label>
+                <input type="text" name="title" class="w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700">Valeur (€)</label>
+                <input type="number" step="0.01" id="amount" class="w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700">Date</label>
+                <input type="date" name="due_date" class="w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700">Statut</label>
+                <input type="checkbox" name="checked" value="true">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700">Compte</label>
+                <input type="text" name="account_name" class="w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700">Mois</label>
+                <input type="text" name="month_name" class="w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700">Catégorie</label>
+                <input type="text" name="category_name" class="w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700">Description</label>
+                <textarea name="description" class="w-full p-2 border rounded"></textarea>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded">
+                    Annuler
+                </button>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded" 
+                        hx-on:click="this.remove()">
+                    Ajouter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+}

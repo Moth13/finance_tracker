@@ -1,0 +1,68 @@
+package components
+
+import (
+	"fmt"
+	decimal "github.com/shopspring/decimal"
+	"time"
+)
+
+type Line struct {
+	Id          string
+	Description string
+	Amount      decimal.Decimal
+	Checked     bool
+	DueDate     time.Time
+	Title       string
+	Account     string
+	Category    string
+	Month       string
+}
+
+templ LineComponent(line Line) {
+	<tr key={ line.Id } class="border-b hover:bg-gray-50 h-0">
+		<td class="px-2 py-0 text-left">
+			if line.Checked {
+				<input
+					type="checkbox"
+					checked
+					class="form-checkbox text-blue-100"
+				/>
+			} else {
+				<input
+					type="checkbox"
+					class="form-checkbox text-blue-100"
+				/>
+			}
+		</td>
+		<td class="px-2 py- text-gray-700">{ line.DueDate.Format("2006/02/01") }</td>
+		<td class="px-2 py-0 text-gray-800">{ line.Title }</td>
+		if line.Amount.GreaterThanOrEqual(decimal.Zero) {
+			<td class="px-2 py-0 text-green-500">{ line.Amount.String() }€</td>
+		} else {
+			<td class="px-2 py-0 text-red-500">{ line.Amount.String() }€</td>
+		}
+		<td class="px-2 py-0 text-gray-800">{ line.Category }</td>
+		<td class="px-2 py-0 text-gray-800">{ line.Account }</td>
+		<td class="px-2 py-0 text-gray-800">{ line.Month }</td>
+		<td>
+			<button
+				hx-delete={ fmt.Sprintf("/lines/%s", line.Id) }
+				hx-swap="delete"
+				hx-target={ fmt.Sprintf("#%s", line.Id) }
+				class="flex items-center border px-2 py-1 rounded-lg hover:bg-red-300"
+			>
+				<p class="text-sm">Delete</p>
+			</button>
+		</td>
+		<td>
+			<button
+				hx-put={ fmt.Sprintf("/lines/%s", line.Id) }
+				hx-swap="put"
+				hx-target={ fmt.Sprintf("#%s", line.Id) }
+				class="flex items-center border px-2 py-1 rounded-lg hover:bg-green-300"
+			>
+				<p class="text-sm">Edit</p>
+			</button>
+		</td>
+	</tr>
+}
