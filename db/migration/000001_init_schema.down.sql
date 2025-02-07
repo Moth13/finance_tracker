@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS lines;
+DROP TABLE IF EXISTS reclines;
+DROP TABLE IF EXISTS months;
+DROP TABLE IF EXISTS years;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS lines_categories;
+DROP TABLE IF EXISTS reclines_categories;
