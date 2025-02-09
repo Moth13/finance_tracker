@@ -373,6 +373,21 @@ func (mr *MockStoreMockRecorder) GetCategoryForUpdate(arg0, arg1 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategoryForUpdate", reflect.TypeOf((*MockStore)(nil).GetCategoryForUpdate), arg0, arg1)
 }
 
+// GetExpliciteLine mocks base method.
+func (m *MockStore) GetExpliciteLine(arg0 context.Context, arg1 int64) (db.GetExpliciteLineRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetExpliciteLine", arg0, arg1)
+	ret0, _ := ret[0].(db.GetExpliciteLineRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetExpliciteLine indicates an expected call of GetExpliciteLine.
+func (mr *MockStoreMockRecorder) GetExpliciteLine(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExpliciteLine", reflect.TypeOf((*MockStore)(nil).GetExpliciteLine), arg0, arg1)
+}
+
 // GetLine mocks base method.
 func (m *MockStore) GetLine(arg0 context.Context, arg1 int64) (db.Line, error) {
 	m.ctrl.T.Helper()

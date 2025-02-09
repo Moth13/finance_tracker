@@ -8,7 +8,12 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func CreateLine() templ.Component {
+import (
+	"fmt"
+	"github.com/moth13/finance_tracker/views/components"
+)
+
+func CreateLine(line components.Line) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,7 +34,128 @@ func CreateLine() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50\" id=\"modal\"><div class=\"bg-white p-6 rounded-lg shadow-lg w-96\"><form><div class=\"modal-body\"><div class=\"mb-4\"><label class=\"block text-gray-700\">Titre</label> <input type=\"text\" name=\"title\" class=\"w-full p-2 border rounded\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Valeur (€)</label> <input type=\"number\" step=\"0.01\" name=\"amount\" class=\"w-full p-2 border rounded\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Date</label> <input type=\"date\" name=\"due_date\" class=\"w-full p-2 border rounded\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Statut</label> <input type=\"checkbox\" name=\"checked\" value=\"true\"></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Compte</label> <input type=\"text\" name=\"account_name\" class=\"w-full p-2 border rounded\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Mois</label> <input type=\"text\" name=\"month_name\" class=\"w-full p-2 border rounded\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Catégorie</label> <input type=\"text\" name=\"category_name\" class=\"w-full p-2 border rounded\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Description</label> <textarea name=\"description\" class=\"w-full p-2 border rounded\"></textarea></div></div><div class=\"modal-footer\"><button type=\"button\" class=\"bg-gray-500 text-white px-4 py-2 rounded\" hx-get=\"/\" hx-target=\"body\">Annuler</button> <button type=\"submit\" class=\"bg-blue-500 text-white px-4 py-2 rounded\" hx-post=\"/views/lines\" hx-target=\"body\">Ajouter</button></div></form></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50\" id=\"modal\"><div class=\"bg-white p-6 rounded-lg shadow-lg w-96\"><form><div class=\"modal-body\"><div class=\"mb-4\"><label class=\"block text-gray-700\">Titre</label> <input type=\"text\" name=\"title\" class=\"w-full p-2 border rounded\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(line.Title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/create_line.templ`, Line: 16, Col: 103}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Valeur (€)</label> <input type=\"number\" step=\"0.01\" name=\"amount\" class=\"w-full p-2 border rounded\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(line.Amount.String())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/create_line.templ`, Line: 20, Col: 128}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Date</label> <input type=\"date\" name=\"due_date\" class=\"w-full p-2 border rounded\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(line.DueDate.Format("2006-01-02"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/create_line.templ`, Line: 24, Col: 129}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Statut</label> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if line.Checked {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"checkbox\" name=\"checked\" value=\"true\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"checkbox\" name=\"checked\" value=\"false\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"mb-4\"><label class=\"block text-gray-700\">Compte</label> <input type=\"text\" name=\"account_name\" class=\"w-full p-2 border rounded\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(line.Account)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/create_line.templ`, Line: 36, Col: 112}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Mois</label> <input type=\"text\" name=\"month_name\" class=\"w-full p-2 border rounded\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(line.Month)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/create_line.templ`, Line: 40, Col: 108}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Catégorie</label> <input type=\"text\" name=\"category_name\" class=\"w-full p-2 border rounded\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(line.Category)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/create_line.templ`, Line: 44, Col: 114}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" required></div><div class=\"mb-4\"><label class=\"block text-gray-700\">Description</label> <textarea name=\"description\" class=\"w-full p-2 border rounded\"></textarea></div></div><div class=\"modal-footer\"><button type=\"button\" class=\"bg-gray-500 text-white px-4 py-2 rounded\" hx-get=\"/\" hx-target=\"body\">Annuler</button> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if line.DbID == 0 {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button type=\"submit\" class=\"bg-blue-500 text-white px-4 py-2 rounded\" hx-post=\"/views/lines\" hx-target=\"body\">Ajouter</button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button type=\"submit\" class=\"bg-blue-500 text-white px-4 py-2 rounded\" hx-put=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/views/lines/%d", line.DbID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/create_line.templ`, Line: 61, Col: 141}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"body\">Sauver</button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></form></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

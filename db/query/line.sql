@@ -18,6 +18,13 @@ INSERT INTO lines (
 SELECT * FROM lines
 WHERE id = $1 LIMIT 1;
 
+-- name: GetExpliciteLine :one
+SELECT lines.id, lines.owner, lines.title, accounts.title as account, months.title as month, categories.title as category, lines.amount, lines.checked, lines.description, lines.due_date FROM lines
+JOIN accounts ON accounts.id = lines.account_id
+JOIN months ON months.id = lines.month_id
+JOIN categories ON categories.id = lines.category_id
+WHERE lines.id = $1;
+
 -- name: GetLineForUpdate :one
 SELECT * FROM lines
 WHERE id = $1 LIMIT 1 FOR NO KEY UPDATE;

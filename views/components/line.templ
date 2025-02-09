@@ -27,11 +27,13 @@ templ LineComponent(line Line) {
 					type="checkbox"
 					checked
 					class="form-checkbox text-blue-100"
+					hx-put={ fmt.Sprintf("/views/lines/%d", line.DbID) }
 				/>
 			} else {
 				<input
 					type="checkbox"
 					class="form-checkbox text-blue-100"
+					hx-put={ fmt.Sprintf("/views/lines/%d", line.DbID) }
 				/>
 			}
 		</td>
@@ -55,9 +57,10 @@ templ LineComponent(line Line) {
 		</td>
 		<td>
 			<button
-				hx-put={ fmt.Sprintf("/lines/%d", line.DbID) }
+				hx-get={ fmt.Sprintf("/views/lines/%d", line.DbID) }
+				hx-put={ fmt.Sprintf("/views/lines/%d", line.DbID) }
+				hx-target="body"
 				hx-swap="put"
-				hx-target={ fmt.Sprintf("#%d", line.DbID) }
 				class="flex items-center border px-2 py-1 rounded-lg hover:bg-green-300"
 			>
 				<p class="text-sm">Edit</p>

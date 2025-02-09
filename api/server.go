@@ -64,8 +64,10 @@ func (server *Server) setupViewRoutes(router *gin.Engine) {
 	views := router.Group("/views")
 
 	views.GET("/lines", server.getViewLinePage)
+	views.GET("/lines/:id", server.getViewLinePage)
 	views.POST("/lines", server.postViewLine)
 	views.DELETE("/lines/:id", server.deleteViewLine)
+	views.PUT("/lines/:id", server.updateViewLine)
 
 	views.GET("/about", server.aboutPageHandler)
 }
