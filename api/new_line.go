@@ -34,8 +34,6 @@ type createLineFormRequest struct {
 func (server *Server) postNewLineHandler(ctx *gin.Context) {
 	var req createLineFormRequest
 	if err := ctx.ShouldBind(&req); err != nil {
-		log.Println(req)
-		log.Println(err)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}

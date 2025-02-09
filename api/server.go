@@ -50,7 +50,7 @@ func (server *Server) setupRouter() {
 	router.Use(cors.Default())
 
 	server.setupViewRoutes(router)
-	server.setupApiRoutes(router)
+		server.setupApiRoutes(router)
 
 	server.router = router
 }
