@@ -1,9 +1,15 @@
 # finance_tracker
 A personal finance tracker backend and UI, using postgresql, golang, gin, htmx and css.
 
+This is a show off project, still in development.
+
+It shows a list of transactions, associated to account, category, month, having a screen to show current and future state.
+
+Goal is to make it deploy on the cloud.
+
 ## Installation
 
-Make sure you have installed golang and docker.
+Make sure you have installed golang.
 
 ```
 git clone https://github.com/Moth13/finance_tracker.git
@@ -20,6 +26,11 @@ make postgres && make createdb
 Then migrate the db
 ```
 make migrateup
+```
+
+As some forms aren't still not implemented (for account, month,...), you need to fake some datas using:
+```
+make faking
 ```
 
 If you want to launch it normally
