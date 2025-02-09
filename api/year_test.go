@@ -115,7 +115,7 @@ func TestCreateYearAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/years"
+			url := "/api/years"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -205,7 +205,7 @@ func TestDeleteYearAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/years/%d", tc.yearID)
+			url := fmt.Sprintf("/api/years/%d", tc.yearID)
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
@@ -296,7 +296,7 @@ func TestGetYearAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/years/%d", tc.yearID)
+			url := fmt.Sprintf("/api/years/%d", tc.yearID)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -407,7 +407,7 @@ func TestListYearsAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/years", nil)
+			request, err := http.NewRequest(http.MethodGet, "/api/years", nil)
 			require.NoError(t, err)
 
 			q := request.URL.Query()
@@ -721,7 +721,7 @@ func TestUpdateYearAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/years/%d", tc.yearID)
+			url := fmt.Sprintf("/api/years/%d", tc.yearID)
 			request, err := http.NewRequest(http.MethodPatch, url, bytes.NewReader(data))
 			require.NoError(t, err)
 

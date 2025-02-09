@@ -29,7 +29,7 @@ templ Line(infos Infos) {
 						<h3 class="px-2 py-0 text-red-400">({ infos.FinalBalance.String() }€)</h3>
 					}
 					<button class="bg-blue-500 text-white px-4 py-2 rounded" 
-							hx-get="/new_line" hx-target="body" hx-swap="beforeend">
+							hx-get="/views/lines" hx-target="body" hx-swap="beforeend">
 						New Line
 					</button>
 				</div>

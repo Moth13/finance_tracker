@@ -85,7 +85,7 @@ func TestCreateRecLineAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/reclines"
+			url := "/api/reclines"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -178,7 +178,7 @@ func TestDeleteRecLineAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/reclines/%d", tc.reclineID)
+			url := fmt.Sprintf("/api/reclines/%d", tc.reclineID)
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
@@ -272,7 +272,7 @@ func TestGetRecLineAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/reclines/%d", tc.reclineID)
+			url := fmt.Sprintf("/api/reclines/%d", tc.reclineID)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -386,7 +386,7 @@ func TestListRecLinesAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/reclines", nil)
+			request, err := http.NewRequest(http.MethodGet, "/api/reclines", nil)
 			require.NoError(t, err)
 
 			q := request.URL.Query()

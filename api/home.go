@@ -10,7 +10,7 @@ import (
 	"github.com/moth13/finance_tracker/views/components"
 )
 
-func (server *Server) homePageHandler(ctx *gin.Context) {
+func (server *Server) homePage(ctx *gin.Context) {
 
 	arg := db.ListExplicitLinesParams{
 		Limit:  10,
@@ -45,6 +45,7 @@ func (server *Server) homePageHandler(ctx *gin.Context) {
 	for _, line := range lines {
 		viewsTodo := &components.Line{
 			Id:          line.Title,
+			DbID:        line.ID,
 			Description: line.Description,
 			Title:       line.Title,
 			Amount:      line.Amount,

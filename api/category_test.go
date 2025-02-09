@@ -86,7 +86,7 @@ func TestCreateCategoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/categories"
+			url := "/api/categories"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -176,7 +176,7 @@ func TestDeleteCategoryAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/categories/%d", tc.categoryID)
+			url := fmt.Sprintf("/api/categories/%d", tc.categoryID)
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
@@ -267,7 +267,7 @@ func TestGetCategoryAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/categories/%d", tc.categoryID)
+			url := fmt.Sprintf("/api/categories/%d", tc.categoryID)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -378,7 +378,7 @@ func TestListCategoriesAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/categories", nil)
+			request, err := http.NewRequest(http.MethodGet, "/api/categories", nil)
 			require.NoError(t, err)
 
 			q := request.URL.Query()

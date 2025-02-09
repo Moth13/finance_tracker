@@ -104,7 +104,7 @@ func TestCreateLineAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/lines"
+			url := "/api/lines"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -220,7 +220,7 @@ func TestDeleteLineAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/lines/%d", tc.lineID)
+			url := fmt.Sprintf("/api/lines/%d", tc.lineID)
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
@@ -316,7 +316,7 @@ func TestGetLineAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/lines/%d", tc.lineID)
+			url := fmt.Sprintf("/api/lines/%d", tc.lineID)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -432,7 +432,7 @@ func TestListLinesAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/lines", nil)
+			request, err := http.NewRequest(http.MethodGet, "/api/lines", nil)
 			require.NoError(t, err)
 
 			q := request.URL.Query()

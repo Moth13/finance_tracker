@@ -48,13 +48,13 @@ func Navigation(activeLink string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if activeLink == "/about" {
+		if activeLink == "/views/about" {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a class=\"block rounded-md px-5 py-2.5 text-sm font-medium text-blue-600 transition\" href=\"/\">About</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a class=\"block rounded-md px-5 py-2.5 text-sm font-medium text-gray-600 transition hover:text-white hover:bg-blue-700 dark:hover:bg-blue-500 dark:hover:text-white\" href=\"/about\">About</a>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a class=\"block rounded-md px-5 py-2.5 text-sm font-medium text-gray-600 transition hover:text-white hover:bg-blue-700 dark:hover:bg-blue-500 dark:hover:text-white\" href=\"/views/about\">About</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

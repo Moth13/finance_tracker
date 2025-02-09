@@ -178,7 +178,7 @@ func TestCreateMonthAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/months"
+			url := "/api/months"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -269,7 +269,7 @@ func TestDeleteMonthAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/months/%d", tc.monthID)
+			url := fmt.Sprintf("/api/months/%d", tc.monthID)
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
@@ -361,7 +361,7 @@ func TestGetMonthAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/months/%d", tc.monthID)
+			url := fmt.Sprintf("/api/months/%d", tc.monthID)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -473,7 +473,7 @@ func TestListMonthsAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/months", nil)
+			request, err := http.NewRequest(http.MethodGet, "/api/months", nil)
 			require.NoError(t, err)
 
 			q := request.URL.Query()
@@ -848,7 +848,7 @@ func TestUpdateMonthAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/months/%d", tc.monthID)
+			url := fmt.Sprintf("/api/months/%d", tc.monthID)
 			request, err := http.NewRequest(http.MethodPatch, url, bytes.NewReader(data))
 			require.NoError(t, err)
 

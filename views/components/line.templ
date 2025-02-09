@@ -8,6 +8,7 @@ import (
 
 type Line struct {
 	Id          string
+	DbID		int64
 	Description string
 	Amount      decimal.Decimal
 	Checked     bool
@@ -46,9 +47,7 @@ templ LineComponent(line Line) {
 		<td class="px-2 py-0 text-gray-800">{ line.Month }</td>
 		<td>
 			<button
-				hx-delete={ fmt.Sprintf("/lines/%s", line.Id) }
-				hx-swap="delete"
-				hx-target={ fmt.Sprintf("#%s", line.Id) }
+				hx-delete={ fmt.Sprintf("/views/lines/%d", line.DbID) } hx-confirm="You sure ?" hx-target="body" hx-swap="outerHTML"
 				class="flex items-center border px-2 py-1 rounded-lg hover:bg-red-300"
 			>
 				<p class="text-sm">Delete</p>
@@ -56,9 +55,9 @@ templ LineComponent(line Line) {
 		</td>
 		<td>
 			<button
-				hx-put={ fmt.Sprintf("/lines/%s", line.Id) }
+				hx-put={ fmt.Sprintf("/lines/%d", line.DbID) }
 				hx-swap="put"
-				hx-target={ fmt.Sprintf("#%s", line.Id) }
+				hx-target={ fmt.Sprintf("#%d", line.DbID) }
 				class="flex items-center border px-2 py-1 rounded-lg hover:bg-green-300"
 			>
 				<p class="text-sm">Edit</p>
