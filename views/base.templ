@@ -1,0 +1,17 @@
+package views
+
+import "github.com/moth13/finance_tracker/views/components"
+
+templ Layout(contents templ.Component, title string, activeLink string) {
+@components.Header()
+
+<body class="flex flex-col h-full bg-slate-300">
+  @Navigation(activeLink)
+  <main class="flex-1 container ">
+    @contents
+  </main>
+  @components.Footer()
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+  <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+</body>
+}

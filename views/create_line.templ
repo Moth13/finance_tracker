@@ -1,0 +1,70 @@
+package views
+
+import (
+    "fmt"
+    "github.com/moth13/finance_tracker/views/components"
+)
+
+
+templ CreateLine(line components.Line) {
+	<div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50" id="modal">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <form>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label class="block text-gray-700">Titre</label>
+                    <input type="text" name="title" class="w-full p-2 border rounded" value={line.Title} required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Valeur (€)</label>
+                    <input type="number" step="0.01" name="amount" class="w-full p-2 border rounded" value={line.Amount.String()} required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Date</label>
+                    <input type="date" name="due_date" class="w-full p-2 border rounded" value={line.DueDate.Format("2006-01-02")} required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Statut</label>
+                    if line.Checked {
+                        <input type="checkbox" name="checked" value="true">
+                    } else {
+                        <input type="checkbox" name="checked" value="false">
+                    }
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Compte</label>
+                    <input type="text" name="account_name" class="w-full p-2 border rounded" value={line.Account} required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Mois</label>
+                    <input type="text" name="month_name" class="w-full p-2 border rounded" value={line.Month} required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Catégorie</label>
+                    <input type="text" name="category_name" class="w-full p-2 border rounded" value={line.Category} required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Description</label>
+                    <textarea name="description" class="w-full p-2 border rounded"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded" hx-get="/" hx-target="body">
+                    Annuler
+                </button>
+
+                if line.DbID == 0 {
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded" hx-post="/views/lines" hx-target="body">
+                        Ajouter
+                    </button>
+                } else {
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded" hx-put={ fmt.Sprintf("/views/lines/%d", line.DbID) } hx-target="body">
+                        Sauver
+                    </button>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+}

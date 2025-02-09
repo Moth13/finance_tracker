@@ -179,9 +179,7 @@ func (server *Server) updateLine(ctx *gin.Context) {
 	result, err := server.store.UpdateLineTx(ctx, arg)
 	fmt.Println(err)
 	if err != nil {
-		fmt.Println("aa")
 		if err == sql.ErrNoRows {
-			fmt.Println("aaa")
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
