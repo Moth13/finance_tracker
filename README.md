@@ -15,6 +15,16 @@ Make sure you have installed golang.
 git clone https://github.com/Moth13/finance_tracker.git
 ```
 
+Install pre-commit using
+```
+brew install pre-commit && pre-commit install
+```
+
+Install commitling using
+```
+npm install -g @commitlint/cli @commitlint/config-conventional
+```
+
 ## Local launch
 
 First launch the postgresql docker image, and create the db
@@ -53,4 +63,3 @@ Launching the test suite
 ```
 make test
 ```
-
