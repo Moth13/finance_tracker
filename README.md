@@ -1,8 +1,7 @@
 # 🚀 Finance Tracker - Where you follow your money
 
-**Finance Tracker** is a modern, full-stack web application for personal finance tracking. Built with Go, Gin, HTMX, and PostgreSQL, it offers robust authentication (JWT & PASETO) and a reactive user experience. The project leverages sqlc for type-safe database access and Air for rapid development.
+***Finance Tracker** is a modern, full-stack web application for personal finance tracking. Built with Go, Gin, HTMX, and PostgreSQL, it offers robust authentication (JWT & PASETO) and a reactive user experience. The project leverages sqlc for type-safe database access and Air for rapid development.*
 
----
 
 ## ✨ Features
 
@@ -21,7 +20,6 @@
 - 💨 **Rapid Development**
   Hot reloading with Air for efficient development workflow.
 
----
 
 ## ⚒️ Tech Stack
 
@@ -31,8 +29,6 @@
 - **ORM/DB Access:** sqlc
 - **Authentication:** JWT, PASETO
 - **Dev Tools:** Air (live reload)
-
----
 
 ## ⚙️ Getting Started
 
@@ -72,8 +68,6 @@
 - Visit `http://localhost:8080` in your browser.
 - Register a new account or log in.
 - Start tracking your expenses and incomes.
-
----
 
 
 ## 📚 Acknowledgements
