@@ -2,12 +2,14 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 	decimal "github.com/shopspring/decimal"
 )
 
@@ -30,10 +32,9 @@ func (server *Server) createRecLine(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateRecLineParams{
-		// Owner:    authPayload.Username,
-		Owner:       "jose",
+		Owner:       authPayload.Username,
 		Title:       req.Title,
 		Description: req.Description,
 		Amount:      req.Amount,
@@ -73,11 +74,11 @@ func (server *Server) getRecLine(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	// if recline.Owner != authPayload.Username {
-	// 	err := errors.New("recline doesn't belong to the authenticated user")
-	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-	// }
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if recline.Owner != authPayload.Username {
+		err := errors.New("recline doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+	}
 
 	ctx.JSON(http.StatusOK, recline)
 }
@@ -95,10 +96,11 @@ func (server *Server) listRecLines(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.ListRecLinesParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
-		Owner:  "jose",
+		Owner:  authPayload.Username,
 	}
 
 	reclines, err := server.store.ListRecLines(ctx, arg)

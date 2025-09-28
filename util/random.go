@@ -92,3 +92,8 @@ func RandomRecurrency() string {
 	recurrencies := []string{WEEKLY, MONTHLY, ANNUAL}
 	return recurrencies[rand.Intn(len(recurrencies))]
 }
+
+// RandomOwner generates a random owner name
+func RandomOwner() string {
+	return RandomString(6)
+}

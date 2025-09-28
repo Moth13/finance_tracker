@@ -14,6 +14,7 @@ import (
 	"github.com/golang/mock/gomock"
 	mockdb "github.com/moth13/finance_tracker/db/mock"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 	"github.com/moth13/finance_tracker/util"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
@@ -21,7 +22,6 @@ import (
 
 func TestCreateYearAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	year := randomYear(user.Username)
 
 	// Test cases definition
@@ -29,12 +29,12 @@ func TestCreateYearAPI(t *testing.T) {
 		name          string
 		body          createYearRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
 			body: createYearRequest{
-				Owner:       year.Owner,
 				Title:       year.Title,
 				Description: year.Description,
 				StartDate:   year.StartDate,
@@ -54,6 +54,9 @@ func TestCreateYearAPI(t *testing.T) {
 					Times(1).
 					Return(year, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchYear(t, recorder.Body, year)
@@ -62,7 +65,6 @@ func TestCreateYearAPI(t *testing.T) {
 		{
 			name: "InvalidTitle",
 			body: createYearRequest{
-				Owner:       year.Owner,
 				Title:       "",
 				Description: year.Description,
 				StartDate:   year.StartDate,
@@ -73,6 +75,9 @@ func TestCreateYearAPI(t *testing.T) {
 					CreateYear(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -80,7 +85,6 @@ func TestCreateYearAPI(t *testing.T) {
 		{
 			name: "InvalidDescription",
 			body: createYearRequest{
-				Owner:       year.Owner,
 				Title:       year.Title,
 				Description: "",
 				StartDate:   year.StartDate,
@@ -90,6 +94,9 @@ func TestCreateYearAPI(t *testing.T) {
 				store.EXPECT().
 					CreateYear(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -119,6 +126,7 @@ func TestCreateYearAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -127,7 +135,6 @@ func TestCreateYearAPI(t *testing.T) {
 
 func TestDeleteYearAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	year := randomYear(user.Username)
 
 	// Test cases definition
@@ -135,6 +142,7 @@ func TestDeleteYearAPI(t *testing.T) {
 		name          string
 		yearID        int64
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -145,6 +153,9 @@ func TestDeleteYearAPI(t *testing.T) {
 					DeleteYear(gomock.Any(), gomock.Eq(year.ID)).
 					Times(1).
 					Return(nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -157,6 +168,9 @@ func TestDeleteYearAPI(t *testing.T) {
 				store.EXPECT().
 					DeleteYear(gomock.Any(), gomock.Eq(year.ID)).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -171,6 +185,9 @@ func TestDeleteYearAPI(t *testing.T) {
 					Times(1).
 					Return(sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -183,6 +200,9 @@ func TestDeleteYearAPI(t *testing.T) {
 					DeleteYear(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(sql.ErrConnDone)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -209,6 +229,7 @@ func TestDeleteYearAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -217,7 +238,6 @@ func TestDeleteYearAPI(t *testing.T) {
 
 func TestGetYearAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	year := randomYear(user.Username)
 
 	// Test cases definition
@@ -225,6 +245,7 @@ func TestGetYearAPI(t *testing.T) {
 		name          string
 		yearID        int64
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -235,6 +256,9 @@ func TestGetYearAPI(t *testing.T) {
 					GetYear(gomock.Any(), gomock.Eq(year.ID)).
 					Times(1).
 					Return(year, nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -250,6 +274,9 @@ func TestGetYearAPI(t *testing.T) {
 					Times(1).
 					Return(db.Year{}, sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -263,6 +290,9 @@ func TestGetYearAPI(t *testing.T) {
 					Times(1).
 					Return(db.Year{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
@@ -274,6 +304,9 @@ func TestGetYearAPI(t *testing.T) {
 				store.EXPECT().
 					GetYear(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -300,6 +333,7 @@ func TestGetYearAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -308,10 +342,9 @@ func TestGetYearAPI(t *testing.T) {
 
 func TestListYearsAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	n := 5
 	years := make([]db.Year, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		years[i] = randomYear(user.Username)
 	}
 
@@ -320,6 +353,7 @@ func TestListYearsAPI(t *testing.T) {
 		name          string
 		query         listYearRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -339,6 +373,9 @@ func TestListYearsAPI(t *testing.T) {
 					Times(1).
 					Return(years, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchYears(t, recorder.Body, years)
@@ -356,6 +393,9 @@ func TestListYearsAPI(t *testing.T) {
 					Times(1).
 					Return([]db.Year{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
@@ -371,6 +411,9 @@ func TestListYearsAPI(t *testing.T) {
 					ListYears(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -385,6 +428,9 @@ func TestListYearsAPI(t *testing.T) {
 				store.EXPECT().
 					ListYears(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -415,6 +461,7 @@ func TestListYearsAPI(t *testing.T) {
 			q.Add("page_size", fmt.Sprintf("%d", tc.query.PageSize))
 			request.URL.RawQuery = q.Encode()
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -423,7 +470,6 @@ func TestListYearsAPI(t *testing.T) {
 
 func TestUpdateYearAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	year1 := randomYear(user.Username)
 	year2 := randomYear(user.Username)
 
@@ -480,6 +526,7 @@ func TestUpdateYearAPI(t *testing.T) {
 		yearID        int64
 		body          updateYearJSONRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -507,6 +554,9 @@ func TestUpdateYearAPI(t *testing.T) {
 					UpdateYear(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(year2, nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -539,6 +589,9 @@ func TestUpdateYearAPI(t *testing.T) {
 					Times(1).
 					Return(year3, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchYear(t, recorder.Body, year3)
@@ -569,6 +622,9 @@ func TestUpdateYearAPI(t *testing.T) {
 					UpdateYear(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(year4, nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -601,6 +657,9 @@ func TestUpdateYearAPI(t *testing.T) {
 					Times(1).
 					Return(year5, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchYear(t, recorder.Body, year5)
@@ -632,6 +691,9 @@ func TestUpdateYearAPI(t *testing.T) {
 					Times(1).
 					Return(year6, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchYear(t, recorder.Body, year6)
@@ -654,6 +716,9 @@ func TestUpdateYearAPI(t *testing.T) {
 					UpdateYear(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -667,6 +732,9 @@ func TestUpdateYearAPI(t *testing.T) {
 					Times(1).
 					Return(db.Year{}, sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -679,6 +747,9 @@ func TestUpdateYearAPI(t *testing.T) {
 					GetYear(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(db.Year{}, sql.ErrConnDone)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -696,6 +767,9 @@ func TestUpdateYearAPI(t *testing.T) {
 					UpdateYear(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(db.Year{}, sql.ErrConnDone)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -725,6 +799,7 @@ func TestUpdateYearAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPatch, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})

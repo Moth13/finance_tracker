@@ -2,16 +2,17 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 )
 
 type createCategoryRequest struct {
 	Title string `json:"title" binding:"required"`
-	Owner string `json:"owner" binding:"required"`
 }
 
 func (server *Server) createCategory(ctx *gin.Context) {
@@ -21,10 +22,9 @@ func (server *Server) createCategory(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateCategoryParams{
-		// Owner:    authPayload.Username,
-		Owner: req.Owner,
+		Owner: authPayload.Username,
 		Title: req.Title,
 	}
 
@@ -58,11 +58,11 @@ func (server *Server) getCategory(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	// if category.Owner != authPayload.Username {
-	// 	err := errors.New("category doesn't belong to the authenticated user")
-	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-	// }
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if category.Owner != authPayload.Username {
+		err := errors.New("category doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+	}
 
 	ctx.JSON(http.StatusOK, category)
 }
@@ -79,10 +79,9 @@ func (server *Server) listCategories(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.ListCategoriesParams{
-		// Owner: authPayload.Username,
-		Owner:  "jose",
+		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}

@@ -9,17 +9,18 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	mockdb "github.com/moth13/finance_tracker/db/mock"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 	"github.com/moth13/finance_tracker/util"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateCategoryAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	category := randomCategory(user.Username)
 
 	// Test cases definition
@@ -27,12 +28,12 @@ func TestCreateCategoryAPI(t *testing.T) {
 		name          string
 		body          createCategoryRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
 			body: createCategoryRequest{
-				Owner: category.Owner,
 				Title: category.Title,
 			},
 			buildStubds: func(store *mockdb.MockStore) {
@@ -46,6 +47,9 @@ func TestCreateCategoryAPI(t *testing.T) {
 					Times(1).
 					Return(category, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchCategory(t, recorder.Body, category)
@@ -54,13 +58,15 @@ func TestCreateCategoryAPI(t *testing.T) {
 		{
 			name: "InvalidTitle",
 			body: createCategoryRequest{
-				Owner: category.Owner,
 				Title: "",
 			},
 			buildStubds: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					CreateCategory(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -90,6 +96,7 @@ func TestCreateCategoryAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -98,7 +105,6 @@ func TestCreateCategoryAPI(t *testing.T) {
 
 func TestDeleteCategoryAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	category := randomCategory(user.Username)
 
 	// Test cases definition
@@ -106,6 +112,7 @@ func TestDeleteCategoryAPI(t *testing.T) {
 		name          string
 		categoryID    int64
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -116,6 +123,9 @@ func TestDeleteCategoryAPI(t *testing.T) {
 					DeleteCategory(gomock.Any(), gomock.Eq(category.ID)).
 					Times(1).
 					Return(nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -128,6 +138,9 @@ func TestDeleteCategoryAPI(t *testing.T) {
 				store.EXPECT().
 					DeleteCategory(gomock.Any(), gomock.Eq(category.ID)).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -142,6 +155,9 @@ func TestDeleteCategoryAPI(t *testing.T) {
 					Times(1).
 					Return(sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -154,6 +170,9 @@ func TestDeleteCategoryAPI(t *testing.T) {
 					DeleteCategory(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(sql.ErrConnDone)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -180,6 +199,7 @@ func TestDeleteCategoryAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -188,7 +208,6 @@ func TestDeleteCategoryAPI(t *testing.T) {
 
 func TestGetCategoryAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	category := randomCategory(user.Username)
 
 	// Test cases definition
@@ -196,6 +215,7 @@ func TestGetCategoryAPI(t *testing.T) {
 		name          string
 		categoryID    int64
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -206,6 +226,9 @@ func TestGetCategoryAPI(t *testing.T) {
 					GetCategory(gomock.Any(), gomock.Eq(category.ID)).
 					Times(1).
 					Return(category, nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -221,6 +244,9 @@ func TestGetCategoryAPI(t *testing.T) {
 					Times(1).
 					Return(db.Category{}, sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -234,6 +260,9 @@ func TestGetCategoryAPI(t *testing.T) {
 					Times(1).
 					Return(db.Category{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
@@ -245,6 +274,9 @@ func TestGetCategoryAPI(t *testing.T) {
 				store.EXPECT().
 					GetCategory(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -271,6 +303,7 @@ func TestGetCategoryAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -279,7 +312,6 @@ func TestGetCategoryAPI(t *testing.T) {
 
 func TestListCategoriesAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	n := 5
 	categories := make([]db.Category, n)
 	for i := 0; i < n; i++ {
@@ -291,6 +323,7 @@ func TestListCategoriesAPI(t *testing.T) {
 		name          string
 		query         listCategoriesRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -310,6 +343,9 @@ func TestListCategoriesAPI(t *testing.T) {
 					Times(1).
 					Return(categories, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchCategories(t, recorder.Body, categories)
@@ -327,6 +363,9 @@ func TestListCategoriesAPI(t *testing.T) {
 					Times(1).
 					Return([]db.Category{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
@@ -342,6 +381,9 @@ func TestListCategoriesAPI(t *testing.T) {
 					ListCategories(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -356,6 +398,9 @@ func TestListCategoriesAPI(t *testing.T) {
 				store.EXPECT().
 					ListCategories(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -386,6 +431,7 @@ func TestListCategoriesAPI(t *testing.T) {
 			q.Add("page_size", fmt.Sprintf("%d", tc.query.PageSize))
 			request.URL.RawQuery = q.Encode()
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})

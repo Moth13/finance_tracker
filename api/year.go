@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -9,10 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 )
 
 type createYearRequest struct {
-	Owner       string    `json:"owner" binding:"required"`
 	Title       string    `json:"title" binding:"required"`
 	Description string    `json:"description" binding:"required"`
 	StartDate   time.Time `json:"start_date" binding:"required"`
@@ -26,10 +27,9 @@ func (server *Server) createYear(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateYearParams{
-		// Owner:    authPayload.Username,
-		Owner:       req.Owner,
+		Owner:       authPayload.Username,
 		Title:       req.Title,
 		Description: req.Description,
 		StartDate:   req.StartDate,
@@ -66,11 +66,11 @@ func (server *Server) getYear(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	// if year.Owner != authPayload.Username {
-	// 	err := errors.New("year doesn't belong to the authenticated user")
-	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-	// }
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if year.Owner != authPayload.Username {
+		err := errors.New("year doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+	}
 
 	ctx.JSON(http.StatusOK, year)
 }
@@ -87,10 +87,9 @@ func (server *Server) listYears(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.ListYearsParams{
-		// Owner: authPayload.Username,
-		Owner:  "jose",
+		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}

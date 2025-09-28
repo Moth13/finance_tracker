@@ -1,11 +1,11 @@
 postgres:
-	docker run --name financetrackerdb -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres:12-alpine
+	container run --name financetrackerdb -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres:17.6-alpine
 
 createdb:
-	docker exec -it financetrackerdb createdb --username=root --owner=root finance_tracker
-	
+	container exec -it financetrackerdb createdb --username=root --owner=root finance_tracker
+
 dropdb:
-	docker exec -it financetrackerdb dropdb finance_tracker
+	container exec -it financetrackerdb dropdb finance_tracker
 
 migrateup:
 	migrate --path db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose up

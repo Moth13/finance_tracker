@@ -17,6 +17,9 @@ func main() {
 	}
 
 	conn, err := db.CreateDBConnection(config.DBSource)
+	if err != nil {
+		log.Fatal("Can't connect to db:", err)
+	}
 	defer conn.Close()
 
 	store := db.NewStore(conn)

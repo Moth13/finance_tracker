@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 )
 
 type createMonthRequest struct {
@@ -93,10 +93,9 @@ func (server *Server) listMonths(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.ListMonthsParams{
-		// Owner: authPayload.Username,
-		Owner:  "jose",
+		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
@@ -209,16 +208,16 @@ func (server *Server) updateMonth(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, month)
 }
 
-func (server *Server) validMonth(ctx *gin.Context, monthID int64) (db.Month, bool) {
-	month, err := server.store.GetMonth(ctx, monthID)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return month, false
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return month, false
-	}
+// func (server *Server) validMonth(ctx *gin.Context, monthID int64) (db.Month, bool) {
+// 	month, err := server.store.GetMonth(ctx, monthID)
+// 	if err != nil {
+// 		if err == pgx.ErrNoRows {
+// 			ctx.JSON(http.StatusNotFound, errorResponse(err))
+// 			return month, false
+// 		}
+// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+// 		return month, false
+// 	}
 
-	return month, true
-}
+// 	return month, true
+// }
