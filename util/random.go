@@ -31,7 +31,7 @@ func RandomString(n int) string {
 
 // RandomUsername generates a random username
 func RandomUsername() string {
-	return RandomString(4)
+	return RandomString(8)
 }
 
 // RandomFullName generates a random username
