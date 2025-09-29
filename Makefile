@@ -1,11 +1,17 @@
+CONTAINER_TOOL := $(shell command -v docker 2>/dev/null || command -v podman 2>/dev/null || command -v container 2>/dev/null)
+
+ifeq ($(CONTAINER_TOOL),)
+$(error "No container tool found. Please install Docker, Podman, Container.")
+endif
+
 postgres:
-	container run --name financetrackerdb -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres:17.6-alpine
+	$(CONTAINER_TOOL) run --name financetrackerdb -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres:17.6-alpine
 
 createdb:
-	container exec -it financetrackerdb createdb --username=root --owner=root finance_tracker
+	$(CONTAINER_TOOL) exec -it financetrackerdb createdb --username=root --owner=root finance_tracker
 
 dropdb:
-	container exec -it financetrackerdb dropdb finance_tracker
+	$(CONTAINER_TOOL) exec -it financetrackerdb dropdb finance_tracker
 
 migrateup:
 	migrate --path db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose up
