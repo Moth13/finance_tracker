@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"github.com/moth13/finance_tracker/api"
@@ -9,7 +10,11 @@ import (
 )
 
 func main() {
-	config, err := util.LoadConfig(".")
+	var configFile string
+	flag.StringVar(&configFile, "config", "./app.env", "Config file name")
+	flag.Parse()
+
+	config, err := util.LoadConfig(configFile)
 	if err != nil {
 		log.Fatal("Can't load config:", err)
 	}

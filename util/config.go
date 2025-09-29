@@ -1,6 +1,8 @@
 package util
 
 import (
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -17,10 +19,16 @@ type Config struct {
 }
 
 // LoadConfig reads configuration from file or environment variables
-func LoadConfig(path string) (config Config, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
+func LoadConfig(configFile string) (config Config, err error) {
+	dir := filepath.Dir(configFile)
+	file := filepath.Base(configFile)
+	ext := filepath.Ext(configFile)
+	extNoDot := strings.TrimPrefix(ext, ".")
+	name := strings.TrimSuffix(file, ext)
+
+	viper.AddConfigPath(dir)
+	viper.SetConfigName(name)
+	viper.SetConfigType(extNoDot)
 
 	viper.AutomaticEnv()
 

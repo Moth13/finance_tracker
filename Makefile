@@ -38,10 +38,10 @@ air:
 	air
 
 server:
-	go run ./cmd/server/main.go
+	go run ./cmd/server/main.go -config ./dev.env
 
 faking:
-	go run ./cmd/faking/main.go
+	go run ./cmd/faking/main.go -config ./dev.env
 
 mock:
 	mockgen -destination db/mock/store.go -package mockdb github.com/moth13/finance_tracker/db/sqlc Store
