@@ -22,7 +22,7 @@ func RandomString(n int) string {
 	var sb strings.Builder
 	k := len(alphabet)
 
-	for i := 0; i < n; i++ {
+	for range n {
 		c := alphabet[rand.Intn(k)]
 		sb.WriteByte(c)
 	}
@@ -31,7 +31,7 @@ func RandomString(n int) string {
 
 // RandomUsername generates a random username
 func RandomUsername() string {
-	return RandomString(4)
+	return RandomString(8)
 }
 
 // RandomFullName generates a random username
@@ -91,4 +91,9 @@ func RandomCurrency() string {
 func RandomRecurrency() string {
 	recurrencies := []string{WEEKLY, MONTHLY, ANNUAL}
 	return recurrencies[rand.Intn(len(recurrencies))]
+}
+
+// RandomOwner generates a random owner name
+func RandomOwner() string {
+	return RandomString(6)
 }

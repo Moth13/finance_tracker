@@ -2,12 +2,14 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 	decimal "github.com/shopspring/decimal"
 )
 
@@ -30,10 +32,9 @@ func (server *Server) createLine(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.AddLineTxParams{
-		// Owner:    authPayload.Username,
-		Owner:       "jose",
+		Owner:       authPayload.Username,
 		Title:       req.Title,
 		Description: req.Description,
 		Checked:     *req.Checked,
@@ -75,11 +76,11 @@ func (server *Server) getLine(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	// if line.Owner != authPayload.Username {
-	// 	err := errors.New("line doesn't belong to the authenticated user")
-	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-	// }
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if line.Owner != authPayload.Username {
+		err := errors.New("line doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+	}
 
 	ctx.JSON(http.StatusOK, line)
 }
@@ -96,10 +97,11 @@ func (server *Server) listLines(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.ListLinesParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
-		Owner:  "jose",
+		Owner:  authPayload.Username,
 	}
 
 	lines, err := server.store.ListLines(ctx, arg)

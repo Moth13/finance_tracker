@@ -2,18 +2,18 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
 	"github.com/lib/pq"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 	decimal "github.com/shopspring/decimal"
 )
 
 type createAccountRequest struct {
-	Owner       string          `json:"owner" binding:"required"`
 	Title       string          `json:"title" binding:"required"`
 	Description string          `json:"description" binding:"required"`
 	InitBalance decimal.Decimal `json:"init_balance" binding:"required"`
@@ -26,17 +26,12 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateAccountParams{
-		// Owner:    authPayload.Username,
-		Owner:       req.Owner,
+		Owner:       authPayload.Username,
 		Title:       req.Title,
 		Description: req.Description,
 		InitBalance: req.InitBalance,
-	}
-
-	if _, valid := server.validUser(ctx, arg.Owner); !valid {
-		return
 	}
 
 	account, err := server.store.CreateAccount(ctx, arg)
@@ -76,11 +71,11 @@ func (server *Server) getAccount(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	// if account.Owner != authPayload.Username {
-	// 	err := errors.New("account doesn't belong to the authenticated user")
-	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-	// }
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if account.Owner != authPayload.Username {
+		err := errors.New("account doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+	}
 
 	ctx.JSON(http.StatusOK, account)
 }
@@ -98,10 +93,9 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.ListAccountsParams{
-		// Owner: authPayload.Username,
-		Owner:  "jose",
+		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
@@ -202,16 +196,16 @@ func (server *Server) updateAccount(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, account)
 }
 
-func (server *Server) validAccount(ctx *gin.Context, accountID int64) (db.Account, bool) {
-	account, err := server.store.GetAccount(ctx, accountID)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return account, false
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return account, false
-	}
+// func (server *Server) validAccount(ctx *gin.Context, accountID int64) (db.Account, bool) {
+// 	account, err := server.store.GetAccount(ctx, accountID)
+// 	if err != nil {
+// 		if err == pgx.ErrNoRows {
+// 			ctx.JSON(http.StatusNotFound, errorResponse(err))
+// 			return account, false
+// 		}
+// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+// 		return account, false
+// 	}
 
-	return account, true
-}
+// 	return account, true
+// }

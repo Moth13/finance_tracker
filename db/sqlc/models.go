@@ -7,6 +7,7 @@ package db
 import (
 	"time"
 
+	"github.com/google/uuid"
 	decimal "github.com/shopspring/decimal"
 )
 
@@ -64,6 +65,17 @@ type Recline struct {
 	Description string          `json:"description"`
 	Recurrency  string          `json:"recurrency"`
 	DueDate     time.Time       `json:"due_date"`
+}
+
+type Session struct {
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	RefreshToken string    `json:"refresh_token"`
+	UserAgent    string    `json:"user_agent"`
+	ClientIp     string    `json:"client_ip"`
+	IsBlocked    bool      `json:"is_blocked"`
+	ExpiresAt    time.Time `json:"expires_at"`
+	CreateAt     time.Time `json:"create_at"`
 }
 
 type User struct {

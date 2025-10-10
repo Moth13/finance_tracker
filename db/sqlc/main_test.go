@@ -1,6 +1,7 @@
 package db
 
 import (
+	"flag"
 	"log"
 	"os"
 	"testing"
@@ -10,8 +11,10 @@ import (
 
 var testStore Store
 
+var configPath = flag.String("config", "../../test.env", "path to config file")
+
 func TestMain(m *testing.M) {
-	config, err := util.LoadConfig("../..")
+	config, err := util.LoadConfig(*configPath)
 	if err != nil {
 		log.Fatal("Can't load config:", err)
 	}

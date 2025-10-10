@@ -6,6 +6,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
@@ -17,6 +19,7 @@ type Querier interface {
 	CreateLine(ctx context.Context, arg CreateLineParams) (Line, error)
 	CreateMonth(ctx context.Context, arg CreateMonthParams) (Month, error)
 	CreateRecLine(ctx context.Context, arg CreateRecLineParams) (Recline, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateYear(ctx context.Context, arg CreateYearParams) (Year, error)
 	DeleteAccount(ctx context.Context, id int64) error
@@ -37,6 +40,7 @@ type Querier interface {
 	GetMonthForUpdate(ctx context.Context, id int64) (Month, error)
 	GetRecLine(ctx context.Context, id int64) (Recline, error)
 	GetRecLineForUpdate(ctx context.Context, id int64) (Recline, error)
+	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	GetYear(ctx context.Context, id int64) (Year, error)
 	GetYearForUpdate(ctx context.Context, id int64) (Year, error)

@@ -9,17 +9,18 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	mockdb "github.com/moth13/finance_tracker/db/mock"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 	"github.com/moth13/finance_tracker/util"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateRecLineAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	account := randomAccount(user.Username)
 	category := randomCategory(user.Username)
 
@@ -30,6 +31,7 @@ func TestCreateRecLineAPI(t *testing.T) {
 		name          string
 		body          createRecLineRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -60,6 +62,9 @@ func TestCreateRecLineAPI(t *testing.T) {
 					Times(1).
 					Return(recline, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchRecLine(t, recorder.Body, recline)
@@ -89,6 +94,7 @@ func TestCreateRecLineAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -97,7 +103,6 @@ func TestCreateRecLineAPI(t *testing.T) {
 
 func TestDeleteRecLineAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	account := randomAccount(user.Username)
 	category := randomCategory(user.Username)
 
@@ -108,6 +113,7 @@ func TestDeleteRecLineAPI(t *testing.T) {
 		name          string
 		reclineID     int64
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -118,6 +124,9 @@ func TestDeleteRecLineAPI(t *testing.T) {
 					DeleteRecLine(gomock.Any(), gomock.Eq(recline.ID)).
 					Times(1).
 					Return(nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -130,6 +139,9 @@ func TestDeleteRecLineAPI(t *testing.T) {
 				store.EXPECT().
 					DeleteRecLine(gomock.Any(), gomock.Eq(recline.ID)).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -144,6 +156,9 @@ func TestDeleteRecLineAPI(t *testing.T) {
 					Times(1).
 					Return(sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -156,6 +171,9 @@ func TestDeleteRecLineAPI(t *testing.T) {
 					DeleteRecLine(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(sql.ErrConnDone)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -182,6 +200,7 @@ func TestDeleteRecLineAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -190,7 +209,6 @@ func TestDeleteRecLineAPI(t *testing.T) {
 
 func TestGetRecLineAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	account := randomAccount(user.Username)
 	category := randomCategory(user.Username)
 
@@ -201,6 +219,7 @@ func TestGetRecLineAPI(t *testing.T) {
 		name          string
 		reclineID     int64
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -211,6 +230,9 @@ func TestGetRecLineAPI(t *testing.T) {
 					GetRecLine(gomock.Any(), gomock.Eq(recline.ID)).
 					Times(1).
 					Return(recline, nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -226,6 +248,9 @@ func TestGetRecLineAPI(t *testing.T) {
 					Times(1).
 					Return(db.Recline{}, sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -239,6 +264,9 @@ func TestGetRecLineAPI(t *testing.T) {
 					Times(1).
 					Return(db.Recline{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
@@ -250,6 +278,9 @@ func TestGetRecLineAPI(t *testing.T) {
 				store.EXPECT().
 					GetRecLine(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -276,6 +307,7 @@ func TestGetRecLineAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -284,13 +316,12 @@ func TestGetRecLineAPI(t *testing.T) {
 
 func TestListRecLinesAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	account := randomAccount(user.Username)
 	category := randomCategory(user.Username)
 
 	n := 5
 	reclines := make([]db.Recline, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		reclines[i] = randomRecLine(user, account, category)
 	}
 
@@ -299,6 +330,7 @@ func TestListRecLinesAPI(t *testing.T) {
 		name          string
 		query         listRecLinesRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -318,6 +350,9 @@ func TestListRecLinesAPI(t *testing.T) {
 					Times(1).
 					Return(reclines, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchRecLines(t, recorder.Body, reclines)
@@ -335,6 +370,9 @@ func TestListRecLinesAPI(t *testing.T) {
 					Times(1).
 					Return([]db.Recline{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
@@ -350,6 +388,9 @@ func TestListRecLinesAPI(t *testing.T) {
 					ListRecLines(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -364,6 +405,9 @@ func TestListRecLinesAPI(t *testing.T) {
 				store.EXPECT().
 					ListRecLines(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -394,6 +438,7 @@ func TestListRecLinesAPI(t *testing.T) {
 			q.Add("page_size", fmt.Sprintf("%d", tc.query.PageSize))
 			request.URL.RawQuery = q.Encode()
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -443,6 +488,5 @@ func requireBodyMatchRecLines(t *testing.T, body *bytes.Buffer, reclines []db.Re
 		require.Equal(t, recline.ID, gotRecLine.ID)
 		require.Equal(t, recline.Owner, gotRecLine.Owner)
 		require.Equal(t, recline.Title, gotRecLine.Title)
-
 	}
 }

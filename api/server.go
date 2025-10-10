@@ -2,6 +2,7 @@ package api
 
 import (
 	"embed"
+	"fmt"
 	"net/http"
 
 	"github.com/a-h/templ"
@@ -9,30 +10,30 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 	"github.com/moth13/finance_tracker/util"
-	// "github.com/techsool/simplebank/token"
 )
 
 // Server serves HTTP request for our banking service
 type Server struct {
-	config util.Config
-	store  db.Store
-	// tokenMaker token.Maker
-	router *gin.Engine
+	config     util.Config
+	store      db.Store
+	tokenMaker token.Maker
+	router     *gin.Engine
 }
 
 var staticFiles embed.FS
 
 // New server creates a new HTTP server dans setup routing
 func NewServer(config util.Config, store db.Store) (*Server, error) {
-	// tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("cannont create token maker %w", err)
-	// }
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker %w", err)
+	}
 	server := &Server{
-		config: config,
-		store:  store,
-		// tokenMaker: tokenMaker,
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
 	}
 
 	// if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -85,53 +86,55 @@ func (server *Server) setupApiRoutes(router *gin.Engine) {
 		})
 	})
 
-	api := router.Group("/api")
+	router.POST("/users", server.createUser)
+	router.POST("/users/login", server.loginUser)
+	router.POST("/tokens/renew_access", server.renewAccessToken)
 
-	api.POST("/users", server.createUser)
-	api.DELETE("/users/:id", server.deleteUser)
-	// api.GET("/users/:id", server.getUser)
-	// api.GET("/users", server.listUsers)
-	// api.POST("/users/login", server.loginUser)
+	authRoutes := router.Group("/api").Use(authMiddleware(server.tokenMaker))
 
-	api.POST("/accounts", server.createAccount)
-	api.GET("/accounts/:id", server.getAccount)
-	api.GET("/accounts", server.listAccounts)
-	api.PATCH("/accounts/:id", server.updateAccount)
-	api.DELETE("/accounts/:id", server.deleteAccount)
+	authRoutes.POST("/users", server.createUser)
+	authRoutes.DELETE("/users/:id", server.deleteUser)
+	// authRoutes.GET("/users/:id", server.getUser)
+	// authRoutes.GET("/users", server.listUsers)
+	// authRoutes.POST("/users/login", server.loginUser)
 
-	api.POST("/months", server.createMonth)
-	api.GET("/months/:id", server.getMonth)
-	api.GET("/months", server.listMonths)
-	api.PATCH("/months/:id", server.updateMonth)
-	api.DELETE("/months/:id", server.deleteMonth)
+	authRoutes.POST("/accounts", server.createAccount)
+	authRoutes.GET("/accounts/:id", server.getAccount)
+	authRoutes.GET("/accounts", server.listAccounts)
+	authRoutes.PATCH("/accounts/:id", server.updateAccount)
+	authRoutes.DELETE("/accounts/:id", server.deleteAccount)
 
-	api.POST("/years", server.createYear)
-	api.GET("/years/:id", server.getYear)
-	api.GET("/years", server.listYears)
-	api.PATCH("/years/:id", server.updateYear)
-	api.DELETE("/years/:id", server.deleteYear)
+	authRoutes.POST("/months", server.createMonth)
+	authRoutes.GET("/months/:id", server.getMonth)
+	authRoutes.GET("/months", server.listMonths)
+	authRoutes.PATCH("/months/:id", server.updateMonth)
+	authRoutes.DELETE("/months/:id", server.deleteMonth)
 
-	api.POST("/categories", server.createCategory)
-	api.GET("/categories/:id", server.getCategory)
-	api.GET("/categories", server.listCategories)
-	// api.UPDATE("/categories/:id", server.updateCategory)
-	api.DELETE("/categories/:id", server.deleteCategory)
+	authRoutes.POST("/years", server.createYear)
+	authRoutes.GET("/years/:id", server.getYear)
+	authRoutes.GET("/years", server.listYears)
+	authRoutes.PATCH("/years/:id", server.updateYear)
+	authRoutes.DELETE("/years/:id", server.deleteYear)
 
-	api.POST("/lines", server.createLine)
-	api.GET("/lines/:id", server.getLine)
-	api.GET("/lines", server.listLines)
-	api.PATCH("/lines/:id", server.updateLine)
-	api.DELETE("/lines/:id", server.deleteLine)
+	authRoutes.POST("/categories", server.createCategory)
+	authRoutes.GET("/categories/:id", server.getCategory)
+	authRoutes.GET("/categories", server.listCategories)
+	// authRoutes.UPDATE("/categories/:id", server.updateCategory)
+	authRoutes.DELETE("/categories/:id", server.deleteCategory)
 
-	api.POST("/reclines", server.createRecLine)
-	api.GET("/reclines/:id", server.getRecLine)
-	api.GET("/reclines", server.listRecLines)
-	// api.UPDATE("/reclines/:id", server.UpdateRecLine)
-	api.DELETE("/reclines/:id", server.deleteRecLine)
+	authRoutes.POST("/lines", server.createLine)
+	authRoutes.GET("/lines/:id", server.getLine)
+	authRoutes.GET("/lines", server.listLines)
+	authRoutes.PATCH("/lines/:id", server.updateLine)
+	authRoutes.DELETE("/lines/:id", server.deleteLine)
+
+	authRoutes.POST("/reclines", server.createRecLine)
+	authRoutes.GET("/reclines/:id", server.getRecLine)
+	authRoutes.GET("/reclines", server.listRecLines)
+	// authRoutes.UPDATE("/reclines/:id", server.UpdateRecLine)
+	authRoutes.DELETE("/reclines/:id", server.deleteRecLine)
 
 	// api.GET("/stats/", server.getStats)
-
-	// authRoutes := api.Group("/").Use(authMiddleware(server.tokenMaker))
 
 	// authRoutes.POST("/accounts", server.createAccount)
 	// authRoutes.GET("/accounts/:id", server.getAccount)

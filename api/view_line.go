@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 	"github.com/moth13/finance_tracker/views"
 	"github.com/moth13/finance_tracker/views/components"
 	"github.com/shopspring/decimal"
@@ -74,15 +75,14 @@ func (server *Server) postViewLine(ctx *gin.Context) {
 		return
 	}
 
-	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	due_date, err := time.Parse("2006-01-02", req.DueDate)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	arg := db.AddLineTxParams{
-		// Owner:    authPayload.Username,
-		Owner:       "jose",
+		Owner:       authPayload.Username,
 		Title:       req.Title,
 		Description: req.Description,
 		Amount:      req.Amount,

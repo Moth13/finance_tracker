@@ -15,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	mockdb "github.com/moth13/finance_tracker/db/mock"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 	"github.com/moth13/finance_tracker/util"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
@@ -22,7 +23,6 @@ import (
 
 func TestCreateMonthAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	year := randomYear(user.Username)
 	month := randomMonth(user.Username, year)
 
@@ -31,6 +31,7 @@ func TestCreateMonthAPI(t *testing.T) {
 		name          string
 		body          createMonthRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -63,6 +64,9 @@ func TestCreateMonthAPI(t *testing.T) {
 					Times(1).
 					Return(month, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchMonth(t, recorder.Body, month)
@@ -83,6 +87,9 @@ func TestCreateMonthAPI(t *testing.T) {
 					CreateMonth(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -101,6 +108,9 @@ func TestCreateMonthAPI(t *testing.T) {
 				store.EXPECT().
 					CreateMonth(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -130,6 +140,9 @@ func TestCreateMonthAPI(t *testing.T) {
 					CreateMonth(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -153,6 +166,9 @@ func TestCreateMonthAPI(t *testing.T) {
 				store.EXPECT().
 					CreateMonth(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -182,6 +198,7 @@ func TestCreateMonthAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -191,7 +208,6 @@ func TestCreateMonthAPI(t *testing.T) {
 func TestDeleteMonthAPI(t *testing.T) {
 	user, _ := randomUser(t)
 	year := randomYear(user.Username)
-	user.Username = "jose"
 	month := randomMonth(user.Username, year)
 
 	// Test cases definition
@@ -199,6 +215,7 @@ func TestDeleteMonthAPI(t *testing.T) {
 		name          string
 		monthID       int64
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -209,6 +226,9 @@ func TestDeleteMonthAPI(t *testing.T) {
 					DeleteMonth(gomock.Any(), gomock.Eq(month.ID)).
 					Times(1).
 					Return(nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -221,6 +241,9 @@ func TestDeleteMonthAPI(t *testing.T) {
 				store.EXPECT().
 					DeleteMonth(gomock.Any(), gomock.Eq(month.ID)).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -235,6 +258,9 @@ func TestDeleteMonthAPI(t *testing.T) {
 					Times(1).
 					Return(sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -247,6 +273,9 @@ func TestDeleteMonthAPI(t *testing.T) {
 					DeleteMonth(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(sql.ErrConnDone)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -273,6 +302,7 @@ func TestDeleteMonthAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -282,7 +312,6 @@ func TestDeleteMonthAPI(t *testing.T) {
 func TestGetMonthAPI(t *testing.T) {
 	user, _ := randomUser(t)
 	year := randomYear(user.Username)
-	user.Username = "jose"
 	month := randomMonth(user.Username, year)
 
 	// Test cases definition
@@ -290,6 +319,7 @@ func TestGetMonthAPI(t *testing.T) {
 		name          string
 		monthID       int64
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -300,6 +330,9 @@ func TestGetMonthAPI(t *testing.T) {
 					GetMonth(gomock.Any(), gomock.Eq(month.ID)).
 					Times(1).
 					Return(month, nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -315,6 +348,9 @@ func TestGetMonthAPI(t *testing.T) {
 					Times(1).
 					Return(db.Month{}, sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -328,6 +364,9 @@ func TestGetMonthAPI(t *testing.T) {
 					Times(1).
 					Return(db.Month{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
@@ -339,6 +378,9 @@ func TestGetMonthAPI(t *testing.T) {
 				store.EXPECT().
 					GetMonth(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -365,6 +407,7 @@ func TestGetMonthAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -374,7 +417,6 @@ func TestGetMonthAPI(t *testing.T) {
 func TestListMonthsAPI(t *testing.T) {
 	user, _ := randomUser(t)
 	year := randomYear(user.Username)
-	user.Username = "jose"
 	n := 5
 	months := make([]db.Month, n)
 	for i := 0; i < n; i++ {
@@ -386,6 +428,7 @@ func TestListMonthsAPI(t *testing.T) {
 		name          string
 		query         listMonthRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -405,6 +448,9 @@ func TestListMonthsAPI(t *testing.T) {
 					Times(1).
 					Return(months, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchMonths(t, recorder.Body, months)
@@ -422,6 +468,9 @@ func TestListMonthsAPI(t *testing.T) {
 					Times(1).
 					Return([]db.Month{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
@@ -437,6 +486,9 @@ func TestListMonthsAPI(t *testing.T) {
 					ListMonths(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -451,6 +503,9 @@ func TestListMonthsAPI(t *testing.T) {
 				store.EXPECT().
 					ListMonths(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -481,6 +536,7 @@ func TestListMonthsAPI(t *testing.T) {
 			q.Add("page_size", fmt.Sprintf("%d", tc.query.PageSize))
 			request.URL.RawQuery = q.Encode()
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -489,7 +545,6 @@ func TestListMonthsAPI(t *testing.T) {
 
 func TestUpdateMonthAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	year1 := randomYear(user.Username)
 	year2 := randomYear(user.Username)
 	month1 := randomMonth(user.Username, year1)
@@ -564,6 +619,7 @@ func TestUpdateMonthAPI(t *testing.T) {
 		monthID       int64
 		body          updateMonthJSONRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -593,6 +649,9 @@ func TestUpdateMonthAPI(t *testing.T) {
 					UpdateMonth(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(month2, nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -627,6 +686,9 @@ func TestUpdateMonthAPI(t *testing.T) {
 					Times(1).
 					Return(month3, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchMonth(t, recorder.Body, month3)
@@ -659,6 +721,9 @@ func TestUpdateMonthAPI(t *testing.T) {
 					UpdateMonth(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(month4, nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -693,6 +758,9 @@ func TestUpdateMonthAPI(t *testing.T) {
 					Times(1).
 					Return(month5, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchMonth(t, recorder.Body, month5)
@@ -725,6 +793,9 @@ func TestUpdateMonthAPI(t *testing.T) {
 					UpdateMonth(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(month6, nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -759,6 +830,9 @@ func TestUpdateMonthAPI(t *testing.T) {
 					Times(1).
 					Return(month7, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchMonth(t, recorder.Body, month7)
@@ -781,6 +855,9 @@ func TestUpdateMonthAPI(t *testing.T) {
 					UpdateMonth(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -794,6 +871,9 @@ func TestUpdateMonthAPI(t *testing.T) {
 					Times(1).
 					Return(db.Month{}, sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -806,6 +886,9 @@ func TestUpdateMonthAPI(t *testing.T) {
 					GetMonth(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(db.Month{}, sql.ErrConnDone)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -823,6 +906,9 @@ func TestUpdateMonthAPI(t *testing.T) {
 					UpdateMonth(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(db.Month{}, sql.ErrConnDone)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -852,6 +938,7 @@ func TestUpdateMonthAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPatch, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})

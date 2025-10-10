@@ -14,13 +14,13 @@ import (
 	"github.com/golang/mock/gomock"
 	mockdb "github.com/moth13/finance_tracker/db/mock"
 	db "github.com/moth13/finance_tracker/db/sqlc"
+	"github.com/moth13/finance_tracker/token"
 	"github.com/moth13/finance_tracker/util"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateLineAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	year := randomYear(user.Username)
 	month := randomMonth(user.Username, year)
 	account := randomAccount(user.Username)
@@ -45,6 +45,7 @@ func TestCreateLineAPI(t *testing.T) {
 		name          string
 		body          createLineRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -79,6 +80,9 @@ func TestCreateLineAPI(t *testing.T) {
 					Times(1).
 					Return(result, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchAddingLine(t, recorder.Body, result)
@@ -108,6 +112,7 @@ func TestCreateLineAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -116,7 +121,6 @@ func TestCreateLineAPI(t *testing.T) {
 
 func TestDeleteLineAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	year := randomYear(user.Username)
 	month := randomMonth(user.Username, year)
 	account := randomAccount(user.Username)
@@ -140,6 +144,7 @@ func TestDeleteLineAPI(t *testing.T) {
 		name          string
 		lineID        int64
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -155,6 +160,9 @@ func TestDeleteLineAPI(t *testing.T) {
 					Times(1).
 					Return(result, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 			},
@@ -166,6 +174,9 @@ func TestDeleteLineAPI(t *testing.T) {
 				store.EXPECT().
 					DeleteLineTx(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -183,6 +194,9 @@ func TestDeleteLineAPI(t *testing.T) {
 					Times(1).
 					Return(result, sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -198,6 +212,9 @@ func TestDeleteLineAPI(t *testing.T) {
 					DeleteLineTx(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(result, sql.ErrConnDone)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -224,6 +241,7 @@ func TestDeleteLineAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -232,7 +250,6 @@ func TestDeleteLineAPI(t *testing.T) {
 
 func TestGetLineAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	year := randomYear(user.Username)
 	month := randomMonth(user.Username, year)
 	account := randomAccount(user.Username)
@@ -245,6 +262,7 @@ func TestGetLineAPI(t *testing.T) {
 		name          string
 		lineID        int64
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -255,6 +273,9 @@ func TestGetLineAPI(t *testing.T) {
 					GetLine(gomock.Any(), gomock.Eq(line.ID)).
 					Times(1).
 					Return(line, nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -270,6 +291,9 @@ func TestGetLineAPI(t *testing.T) {
 					Times(1).
 					Return(db.Line{}, sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -283,6 +307,9 @@ func TestGetLineAPI(t *testing.T) {
 					Times(1).
 					Return(db.Line{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
@@ -294,6 +321,9 @@ func TestGetLineAPI(t *testing.T) {
 				store.EXPECT().
 					GetLine(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -320,6 +350,7 @@ func TestGetLineAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -328,7 +359,6 @@ func TestGetLineAPI(t *testing.T) {
 
 func TestListLinesAPI(t *testing.T) {
 	user, _ := randomUser(t)
-	user.Username = "jose"
 	year := randomYear(user.Username)
 	month := randomMonth(user.Username, year)
 	account := randomAccount(user.Username)
@@ -345,6 +375,7 @@ func TestListLinesAPI(t *testing.T) {
 		name          string
 		query         listCategoriesRequest
 		buildStubds   func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -364,6 +395,9 @@ func TestListLinesAPI(t *testing.T) {
 					Times(1).
 					Return(lines, nil)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchLines(t, recorder.Body, lines)
@@ -381,6 +415,9 @@ func TestListLinesAPI(t *testing.T) {
 					Times(1).
 					Return([]db.Line{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
@@ -396,6 +433,9 @@ func TestListLinesAPI(t *testing.T) {
 					ListLines(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -410,6 +450,9 @@ func TestListLinesAPI(t *testing.T) {
 				store.EXPECT().
 					ListLines(gomock.Any(), gomock.Any()).
 					Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -440,6 +483,7 @@ func TestListLinesAPI(t *testing.T) {
 			q.Add("page_size", fmt.Sprintf("%d", tc.query.PageSize))
 			request.URL.RawQuery = q.Encode()
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
