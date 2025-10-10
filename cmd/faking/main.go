@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"time"
 
@@ -11,7 +12,11 @@ import (
 )
 
 func main() {
-	config, err := util.LoadConfig(".")
+	var configFile string
+	flag.StringVar(&configFile, "config", "./app.env", "Config file name")
+	flag.Parse()
+
+	config, err := util.LoadConfig(configFile)
 	if err != nil {
 		log.Fatal("Can't load config:", err)
 	}
