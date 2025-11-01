@@ -1,8 +1,11 @@
 name: Deploy to Minikube (Raspberry Pi)
 
 on:
-  push:
-    branches: [ main ]
+  workflow_run:
+    workflows: ["Run unit tests"]
+    branches: [main]
+    types:
+      - completed
 
 jobs:
   deploy:
@@ -12,4 +15,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Launch docker-compose
-        run: docker-compose -f docker-compose.yaml up -d
+        run: docker compose -f docker-compose.yaml up -d
