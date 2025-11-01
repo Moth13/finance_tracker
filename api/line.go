@@ -68,7 +68,7 @@ func (server *Server) getLine(ctx *gin.Context) {
 
 	line, err := server.store.GetLine(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -106,7 +106,7 @@ func (server *Server) listLines(ctx *gin.Context) {
 
 	lines, err := server.store.ListLines(ctx, arg)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -135,7 +135,7 @@ func (server *Server) deleteLine(ctx *gin.Context) {
 	result, err := server.store.DeleteLineTx(ctx, arg)
 	fmt.Println(err)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -181,7 +181,7 @@ func (server *Server) updateLine(ctx *gin.Context) {
 	result, err := server.store.UpdateLineTx(ctx, arg)
 	fmt.Println(err)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

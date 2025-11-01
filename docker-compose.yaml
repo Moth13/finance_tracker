@@ -1,0 +1,41 @@
+services:
+  financetrackerdb:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: finance_tracker
+    ports:
+      - "5432:5432"
+    volumes:
+      - financedb:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d finance_tracker"]
+      interval: 5s
+      retries: 5
+
+  migrate:
+    image: migrate/migrate
+    depends_on:
+      financetrackerdb:
+        condition: service_healthy
+    volumes:
+      - ./db/migration/:/migrations
+    command: ["-path", "/migrations/", "-database", "postgres://user:secret@financetrackerdb:5432/finance_tracker?sslmode=disable", "up"]
+
+  app:
+    build: .
+    image: financetracker:latest
+    depends_on:
+      financetrackerdb:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    environment:
+      DB_SOURCE: postgres://user:secret@financetrackerdb:5432/finance_tracker
+
+volumes:
+  financedb:
+    name: financedb

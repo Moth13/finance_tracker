@@ -66,7 +66,7 @@ func (server *Server) getRecLine(ctx *gin.Context) {
 
 	recline, err := server.store.GetRecLine(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -105,7 +105,7 @@ func (server *Server) listRecLines(ctx *gin.Context) {
 
 	reclines, err := server.store.ListRecLines(ctx, arg)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -129,7 +129,7 @@ func (server *Server) deleteRecLine(ctx *gin.Context) {
 
 	err := server.store.DeleteRecLine(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

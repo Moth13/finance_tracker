@@ -2,6 +2,8 @@ package api
 
 import (
 	"database/sql"
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,29 +20,24 @@ func (server *Server) homePage(ctx *gin.Context) {
 		Owner:  "jose",
 	}
 
+	var viewInfos views.Infos
+
 	lines, err := server.store.ListExplicitLines(ctx, arg)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	account, err := server.store.GetAccount(ctx, 1)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Println(err)
+		log.Println(sql.ErrNoRows)
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
+	} else {
+		viewInfos.Balance = account.Balance
+		viewInfos.FinalBalance = account.FinalBalance
 	}
-
-	var viewInfos views.Infos
-	viewInfos.Balance = account.Balance
-	viewInfos.FinalBalance = account.FinalBalance
 
 	for _, line := range lines {
 		viewsTodo := &components.Line{

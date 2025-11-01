@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -25,7 +26,7 @@ func (server *Server) getViewLinePage(ctx *gin.Context) {
 	if err := ctx.ShouldBindUri(&req); err == nil && req.ID > 0 {
 		line, err := server.store.GetExpliciteLine(ctx, req.ID)
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
 				ctx.JSON(http.StatusNotFound, errorResponse(err))
 				return
 			}
@@ -120,7 +121,7 @@ func (server *Server) deleteViewLine(ctx *gin.Context) {
 	_, err := server.store.DeleteLineTx(ctx, arg)
 	fmt.Println(err)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -178,7 +179,7 @@ func (server *Server) updateViewLine(ctx *gin.Context) {
 
 	_, err := server.store.UpdateLineTx(ctx, arg)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

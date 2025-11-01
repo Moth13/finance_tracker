@@ -58,7 +58,7 @@ func (server *Server) getYear(ctx *gin.Context) {
 
 	year, err := server.store.GetYear(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -116,7 +116,7 @@ func (server *Server) deleteYear(ctx *gin.Context) {
 
 	err := server.store.DeleteYear(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -153,7 +153,7 @@ func (server *Server) updateYear(ctx *gin.Context) {
 	// Get year
 	year, err := server.store.GetYear(ctx, reqURI.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -64,7 +65,7 @@ func (server *Server) getMonth(ctx *gin.Context) {
 
 	month, err := server.store.GetMonth(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -122,7 +123,7 @@ func (server *Server) deleteMonth(ctx *gin.Context) {
 
 	err := server.store.DeleteMonth(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -160,7 +161,7 @@ func (server *Server) updateMonth(ctx *gin.Context) {
 	// Get month
 	month, err := server.store.GetMonth(ctx, reqURI.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

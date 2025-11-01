@@ -50,7 +50,7 @@ func (server *Server) getCategory(ctx *gin.Context) {
 
 	category, err := server.store.GetCategory(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -108,7 +108,7 @@ func (server *Server) deleteCategory(ctx *gin.Context) {
 
 	err := server.store.DeleteCategory(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
