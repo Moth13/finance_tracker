@@ -13,19 +13,11 @@ jobs:
     environment: dev_local
     env:
       POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-      POSTGRES_SECRET: ${{ vars.POSTGRES_USER }}
+      POSTGRES_SECRET: ${{ vars.POSTGRES_SECRET }}
       TOKEN_SYMMETRIC_KEY: ${{ secrets.TOKEN_SYMMETRIC_KEY }}
       ACCESS_TOKEN_DURATION: ${{ vars.ACCESS_TOKEN_DURATION }}
       REFRESH_TOKEN_DURATION: ${{ vars.REFRESH_TOKEN_DURATION }}
     steps:
-      - name: display env variables
-        run: |
-          echo "POSTGRES_USER=$POSTGRES_USER"
-          echo "POSTGRES_SECRET=$POSTGRES_SECRET"
-          echo "TOKEN_SYMMETRIC_KEY is set"
-          echo "ACCESS_TOKEN_DURATION=$ACCESS_TOKEN_DURATION"
-          echo "REFRESH_TOKEN_DURATION=$REFRESH_TOKEN_DURATION"
-
       - name: Checkout code
         uses: actions/checkout@v4
 
