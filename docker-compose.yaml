@@ -2,15 +2,15 @@ services:
   financetrackerdb:
     image: postgres:17.6-alpine
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: secret
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_SECRET}
       POSTGRES_DB: finance_tracker
     ports:
       - "5432:5432"
     volumes:
       - financedb:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d finance_tracker"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d finance_tracker"]
       interval: 5s
       retries: 5
 
@@ -21,7 +21,7 @@ services:
         condition: service_healthy
     volumes:
       - ./db/migration/:/migrations
-    command: ["-path", "/migrations/", "-database", "postgres://user:secret@financetrackerdb:5432/finance_tracker?sslmode=disable", "up"]
+    command: ["-path", "/migrations/", "-database", "postgres://${POSTGRES_USER}:${POSTGRES_SECRET}@financetrackerdb:5432/finance_tracker?sslmode=disable", "up"]
 
   app:
     build: .
@@ -34,7 +34,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DB_SOURCE: postgres://user:secret@financetrackerdb:5432/finance_tracker
+      DB_SOURCE: postgres://${POSTGRES_USER}:${POSTGRES_SECRET}@financetrackerdb:5432/finance_tracker?sslmode=disable
+      DB_DRIVER: postgres
+      SERVER_ADDRESS: "0.0.0.0:8080"
+      TOKEN_SYMMETRIC_KEY: ${TOKEN_SYMMETRIC_KEY}
+      ACCESS_TOKEN_DURATION: ${ACCESS_TOKEN_DURATION} # e.g., "15m"
+      REFRESH_TOKEN_DURATION: ${REFRESH_TOKEN_DURATION} # e.g., "7d
 
 volumes:
   financedb:

@@ -10,6 +10,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main cmd/server/main.go
 FROM scratch as runner
 WORKDIR /app
 COPY --from=builder /app/main .
-COPY --from=builder /app/app.env .
+COPY --from=builder /app/app.env.sample app.env
 EXPOSE 8080
 CMD ["./main"]

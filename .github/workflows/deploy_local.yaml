@@ -10,6 +10,12 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    env:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_SECRET: $POSTGRES_USER
+      TOKEN_SYMMETRIC_KEY: ${{ secrets.TOKEN_SYMMETRIC_KEY }}
+      ACCESS_TOKEN_DURATION: $ACCESS_TOKEN_DURATION
+      REFRESH_TOKEN_DURATION: $REFRESH_TOKEN_DURATION
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
