@@ -10,12 +10,13 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    environment: dev_local
     env:
-      POSTGRES_USER: $POSTGRES_USER
-      POSTGRES_SECRET: $POSTGRES_USER
+      POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+      POSTGRES_SECRET: ${{ vars.POSTGRES_USER }}
       TOKEN_SYMMETRIC_KEY: ${{ secrets.TOKEN_SYMMETRIC_KEY }}
-      ACCESS_TOKEN_DURATION: $ACCESS_TOKEN_DURATION
-      REFRESH_TOKEN_DURATION: $REFRESH_TOKEN_DURATION
+      ACCESS_TOKEN_DURATION: ${{ vars.ACCESS_TOKEN_DURATION }}
+      REFRESH_TOKEN_DURATION: ${{ vars.REFRESH_TOKEN_DURATION }}
     steps:
       - name: display env variables
         run: |
