@@ -46,6 +46,9 @@ jobs:
         sudo mv migrate /usr/bin/migrate
         which migrate
 
+    - name: Generate views files
+      run: make templ
+
     - name: Run migrations
       run: make migrateup
 
