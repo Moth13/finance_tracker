@@ -31,5 +31,3 @@ go.work.sum
 internal/web/static/views/**/*.go
 
 .vscode
-
-*.sql
