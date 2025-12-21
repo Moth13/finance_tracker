@@ -46,6 +46,9 @@ jobs:
         sudo mv migrate /usr/bin/migrate
         which migrate
 
+    - name: Install dependencies
+      run: go mod download
+
     - name: Generate views files
       run: make templ
 
