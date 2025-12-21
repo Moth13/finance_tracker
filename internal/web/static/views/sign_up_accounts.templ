@@ -1,0 +1,26 @@
+package views
+
+templ SignUpAccounts() {
+    <div class="m-auto p-6 max-w-md w-full bg-white rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4">Create your account</h2>
+        <form hx-post="/views/sign_up_2" hx-target="#main" hx-swap="innerHTML" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700" for="title">Title</label>
+                <input class="mt-1 block w-full px-3 py-2 border rounded-md" id="title" name="title" type="text" required autocomplete="title" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700" for="description">Description</label>
+                <input class="mt-1 block w-full px-3 py-2 border rounded-md" id="description" name="description" type="text" autocomplete="description" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700" for="init_balance">Init Balance</label>
+                <input class="mt-1 block w-full px-3 py-2 border rounded-md" id="init_balance" name="init_balance" type="init_balance" required autocomplete="init_balance" />
+            </div>
+            <button hx-post="/views/login" hx-target="#main" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md" type="submit">Previous</button>
+            <button hx-post="/views/signup_account" hx-target="#main" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md" type="submit">Next</button>
+        </form>
+        <div class="mt-4 text-xs text-gray-500 text-center">
+            By signing up, you agree to our <a href="/terms" class="text-indigo-600 underline">Terms of Service</a> and <a href="/privacy" class="text-indigo-600 underline">Privacy Policy</a>.
+        </div>
+    </div>
+}

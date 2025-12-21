@@ -1,0 +1,30 @@
+package db
+
+import (
+	"flag"
+	"log"
+	"os"
+	"testing"
+
+	"github.com/moth13/finance_tracker/internal/util"
+)
+
+var testStore Store
+
+var configPath = flag.String("config", "../../../test.env", "path to config file")
+
+func TestMain(m *testing.M) {
+	config, err := util.LoadConfig(*configPath)
+	if err != nil {
+		log.Fatal("Can't load config:", err)
+	}
+
+	connPool, err := CreateDBConnection(config.DBSource)
+	if err != nil {
+		log.Fatal("Can't connect to db: ", err)
+	}
+
+	testStore = NewStore(connPool)
+
+	os.Exit(m.Run())
+}

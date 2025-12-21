@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	db "github.com/moth13/finance_tracker/db/sqlc"
-	"github.com/moth13/finance_tracker/util"
+	db "github.com/moth13/finance_tracker/internal/db/sqlc"
+	"github.com/moth13/finance_tracker/internal/util"
 	"github.com/shopspring/decimal"
 )
 

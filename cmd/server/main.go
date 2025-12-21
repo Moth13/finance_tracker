@@ -4,9 +4,9 @@ import (
 	"flag"
 	"log"
 
-	"github.com/moth13/finance_tracker/api"
-	db "github.com/moth13/finance_tracker/db/sqlc"
-	"github.com/moth13/finance_tracker/util"
+	db "github.com/moth13/finance_tracker/internal/db/sqlc"
+	"github.com/moth13/finance_tracker/internal/server"
+	"github.com/moth13/finance_tracker/internal/util"
 )
 
 func main() {
@@ -26,7 +26,7 @@ func main() {
 	defer conn.Close()
 
 	store := db.NewStore(conn)
-	server, err := api.NewServer(config, store)
+	server, err := server.NewServer(config, store)
 	if err != nil {
 		log.Fatal("cannot create server:", err)
 	}
