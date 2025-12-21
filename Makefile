@@ -14,16 +14,16 @@ dropdb:
 	$(CONTAINER_TOOL) exec -it financetrackerdb dropdb finance_tracker
 
 migrateup:
-	migrate --path db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose up
+	migrate --path internal/db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose up
 
 migrateup1:
-	migrate --path db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose up 1
+	migrate --path internal/db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose up 1
 
 migratedown:
-	migrate --path db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose down
+	migrate --path internal/db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose down
 
 migratedown1:
-	migrate --path db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose down 1
+	migrate --path internal/db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose down 1
 
 sqlc:
 	sqlc generate
