@@ -46,6 +46,12 @@ jobs:
         sudo mv migrate /usr/bin/migrate
         which migrate
 
+    - name: Install templ
+      run: go install github.com/a-h/templ/cmd/templ@latest
+
+    - name: Generate views files
+      run: make templ
+
     - name: Run migrations
       run: make migrateup
 

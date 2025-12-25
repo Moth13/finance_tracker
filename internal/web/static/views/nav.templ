@@ -1,0 +1,27 @@
+package views
+
+import "strings"
+
+templ Navigation(userName string) {
+	<aside class="flex h-full w-64 flex-col bg-slate-900 text-slate-100">
+		<!-- User block -->
+		<div class="flex items-center gap-3 px-4 py-4">
+			<div class="h-10 w-10 flex items-center justify-center rounded-full bg-slate-700 text-sm font-semibold">
+				<a href="#user" hx-get="/views/user" hx-target="#content">
+					{ userName[:1] + userName[strings.Index(userName, " ")+1:strings.Index(userName, " ")+2] }
+				</a>
+			</div>
+			<div class="text-sm truncate">{ userName }</div>
+		</div>
+		<nav class="flex-1 px-3 py-4">
+			<ul class="space-y-2">
+				<li><a href="#lines" hx-get="/views/lines" hx-target="#content" class="block py-2 px-3 rounded hover:bg-slate-700">Current</a></li>
+				<li><a href="#months" hx-get="/views/months" hx-target="#content" class="block py-2 px-3 rounded hover:bg-slate-700">Months</a></li>
+				<li><a href="#accounts" hx-get="/views/accounts" hx-target="#content" class="block py-2 px-3 rounded hover:bg-slate-700">Account</a></li>
+				<li><a href="#about" hx-get="/views/about" hx-target="#content" class="block py-2 px-3 rounded hover:bg-slate-700">About</a></li>
+				<li><a href="#logout" hx-get="/views/logout" hx-target="#main" class="block py-2 px-3 rounded hover:bg-slate-700">Log out</a></li>
+			</ul>
+		</nav>
+		<div class="px-3 py-4 text-xs text-slate-400">&copy; Finance Tracker</div>
+	</aside>
+}

@@ -1,0 +1,74 @@
+package components
+
+import (
+	"fmt"
+	decimal "github.com/shopspring/decimal"
+	"time"
+)
+
+type Line struct {
+	Id          string
+	DbID		int64
+	Description string
+	Amount      decimal.Decimal
+	Checked     bool
+	DueDate     time.Time
+	Title       string
+	Account     string
+	Category    string
+	Month       string
+}
+
+templ LineComponent(line Line) {
+	<tr key={ line.Id } class="hover:bg-gray-50 transition-colors text-xs">
+		<td class="px-3 py-1 text-xs text-gray-700">
+			if line.Checked {
+				<input
+					type="checkbox"
+					checked
+					class="h-3 w-3 text-indigo-600"
+					hx-put={ fmt.Sprintf("/views/lines/%d", line.DbID) }
+					hx-trigger="change"
+				/>
+			} else {
+				<input
+					type="checkbox"
+					class="h-3 w-3 text-indigo-600"
+					hx-put={ fmt.Sprintf("/views/lines/%d", line.DbID) }
+					hx-trigger="change"
+				/>
+			}
+		</td>
+		<td class="px-3 py-1 text-xs text-gray-700">{ line.DueDate.Format("2006-01-02") }</td>
+		<td class="px-3 py-1 text-xs text-gray-800">{ line.Title }</td>
+		if line.Amount.GreaterThanOrEqual(decimal.Zero) {
+			<td class="px-3 py-1 text-xs text-right text-green-600">{ line.Amount.String() }€</td>
+		} else {
+			<td class="px-6 py-4 text-sm text-right text-red-600">{ line.Amount.String() }€</td>
+		}
+		<td class="px-3 py-1 text-xs text-gray-800">{ line.Category }</td>
+		<td class="px-3 py-1 text-xs text-gray-800">{ line.Account }</td>
+		<td class="px-3 py-1 text-xs text-gray-800">{ line.Month }</td>
+		<td class="px-3 py-1 text-xs">
+			<button
+				hx-delete={ fmt.Sprintf("/views/lines/%d", line.DbID) }
+				hx-confirm="You sure?"
+				hx-target="closest tr"
+				hx-swap="outerHTML"
+				class="text-red-600 hover:bg-red-50 px-2 py-0 rounded text-xs"
+			>
+				<span>Delete</span>
+			</button>
+		</td>
+		<td class="px-4 py-2 text-sm">
+			<button
+				hx-get={ fmt.Sprintf("/views/lines/%d", line.DbID) }
+				hx-target="#content"
+				hx-swap="innerHTML"
+				class="text-indigo-600 hover:bg-indigo-50 px-2 py-0 rounded text-xs"
+			>
+				<span>Edit</span>
+			</button>
+		</td>
+	</tr>
+}

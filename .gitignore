@@ -27,6 +27,7 @@ go.work.sum
 *.env
 !test.env
 
-.vscode
+# Generated files
+internal/web/static/views/**/*.go
 
-*.sql
+.vscode

@@ -14,16 +14,16 @@ dropdb:
 	$(CONTAINER_TOOL) exec -it financetrackerdb dropdb finance_tracker
 
 migrateup:
-	migrate --path db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose up
+	migrate --path internal/db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose up
 
 migrateup1:
-	migrate --path db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose up 1
+	migrate --path internal/db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose up 1
 
 migratedown:
-	migrate --path db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose down
+	migrate --path internal/db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose down
 
 migratedown1:
-	migrate --path db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose down 1
+	migrate --path internal/db/migration -database "postgresql://root:secret@localhost:5432/finance_tracker?sslmode=disable" -verbose down 1
 
 sqlc:
 	sqlc generate
@@ -44,6 +44,6 @@ faking:
 	go run ./cmd/faking/main.go -config ./dev.env
 
 mock:
-	mockgen -destination db/mock/store.go -package mockdb github.com/moth13/finance_tracker/db/sqlc Store
+	mockgen -destination internal/db/mock/store.go -package mockdb github.com/moth13/finance_tracker/internal/db/sqlc Store
 
 .PHONY: postgres createdb dropdb migrateup migratedown server mock migratedown1 migrateup1 air templ faking

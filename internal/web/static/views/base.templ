@@ -1,0 +1,16 @@
+package views
+
+import "github.com/moth13/finance_tracker/internal/web/static/views/components"
+
+templ Base(contents templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en" id="base_main">
+		<body class="min-h-screen flex flex-col">
+			@components.Header()
+			<main id="main" class="flex-1 flex">
+				@contents
+			</main>
+			@components.Footer()
+		</body>
+	</html>
+}
