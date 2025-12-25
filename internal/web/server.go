@@ -19,7 +19,8 @@ type Server struct {
 var staticFiles embed.FS
 
 type User struct {
-	Email string
+	Email    string
+	Username string
 }
 
 func (server *Server) SetupRoutes(router *gin.Engine) {

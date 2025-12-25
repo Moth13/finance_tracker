@@ -44,6 +44,6 @@ faking:
 	go run ./cmd/faking/main.go -config ./dev.env
 
 mock:
-	mockgen -destination db/mock/store.go -package mockdb github.com/moth13/finance_tracker/internal/db/sqlc Store
+	mockgen -destination internal/db/mock/store.go -package mockdb github.com/moth13/finance_tracker/internal/db/sqlc Store
 
 .PHONY: postgres createdb dropdb migrateup migratedown server mock migratedown1 migrateup1 air templ faking

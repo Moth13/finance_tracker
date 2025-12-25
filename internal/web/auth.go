@@ -15,12 +15,17 @@ func getCurrentUser(ctx *gin.Context) *User {
 	if !ok || email == "" {
 		return nil
 	}
-	return &User{Email: email}
+	username, ok := sess.Get("username").(string)
+	if !ok || username == "" {
+		return nil
+	}
+	return &User{Email: email, Username: username}
 }
 
-func setUserSession(ctx *gin.Context, email string) error {
+func setUserSession(ctx *gin.Context, email string, username string) error {
 	sess := sessions.Default(ctx)
 	sess.Set("email", email)
+	sess.Set("username", username)
 	return sess.Save()
 }
 

@@ -23,6 +23,15 @@ func (server *Server) homePage(ctx *gin.Context) {
 	}
 }
 
-func isUser(email string, password string) bool {
-	return email == "a@a.com"
+func (server *Server) isUser(ctx *gin.Context, email string, password string) (*User, error) {
+	user, err := server.Store.GetUserByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = util.CheckPassword(password, user.HashedPassword); err != nil {
+		return nil, err
+	}
+
+	return &User{Email: user.Email, Username: user.Username}, nil
 }

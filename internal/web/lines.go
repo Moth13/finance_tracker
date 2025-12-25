@@ -19,11 +19,16 @@ type getViewLineRequest struct {
 }
 
 func (server *Server) viewLinesPage(ctx *gin.Context) {
+	user := getCurrentUser(ctx)
+	if user == nil {
+		ctx.Redirect(http.StatusSeeOther, "/login")
+		return
+	}
 
 	arg := db.ListExplicitLinesParams{
 		Limit:  10,
 		Offset: 0,
-		Owner:  "jose",
+		Owner:  user.Username,
 	}
 
 	var viewInfos views.Infos
@@ -129,6 +134,12 @@ type createLineFormRequest struct {
 }
 
 func (server *Server) postViewLine(ctx *gin.Context) {
+	user := getCurrentUser(ctx)
+	if user == nil {
+		ctx.Redirect(http.StatusSeeOther, "/login")
+		return
+	}
+
 	var req createLineFormRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, util.ErrorResponse(err))
@@ -141,8 +152,7 @@ func (server *Server) postViewLine(ctx *gin.Context) {
 		return
 	}
 	arg := db.AddLineTxParams{
-		// Owner:       authPayload.Username,
-		Owner:       "Jose",
+		Owner:       user.Username,
 		Title:       req.Title,
 		Description: req.Description,
 		Amount:      req.Amount,
